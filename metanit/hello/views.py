@@ -2,15 +2,37 @@ from django.shortcuts import render
 from django.template.response import TemplateResponse
 from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
-  
+from random import randint  
+from .forms import UserForm
 
 def index(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        age = request.POST.get("age")
+        string = f"Привет, {name}, твой возраст: {age}"
+        return render(request, "index.html", {"string": string})
+    else:
+        userform = UserForm()
+        return render(request, "index.html", {"form": userform})
+
+def postuser(request):
+    # получаем из данных запроса POST отправленные через форму данные
+    name = request.POST.get("name", "Undefined")
+    age = request.POST.get("age", 1)
+    langs = request.POST.getlist("languages", ["python"])
+    return HttpResponse(f"""
+                <div>Name: {name}  Age: {age}<div>
+                <div>Languages: {langs}</div>
+            """)
+    # return HttpResponse(request)
+
+def data(request):
     # langs = []
     colors = {"red": "красный", "green": "зеленый", "blue":"синий"}
     langs = ["Python", "JavaScript", "Java", "C#", "C++"]
     data = {"header": "Hello Django",
             "message": "Welcome to Python", "person": Person("Bob", 41), "body": "<h1>Hello World!</h1>", "n": 0, "langs": langs, "data": colors, "users": ["Tom", "Sam", "Bob", "Mike"]}
-    return render(request, "index.html", context=data)
+    return render(request, "data.html", context=data)
 
 def complex(request):
     header = "Данные пользователя"              # обычная переменная
@@ -99,7 +121,13 @@ def top(request):
 
 
 def contact(request):
-    return HttpResponseRedirect("/about")
+    site = "topacademy.ru"
+    if randint(1,10)%2==0:
+        site = "gakman.space"
+
+    data = {"tutorial": "Django", "site":site}
+    return render(request, "contact.html", context=data)
+
 
 
 def details(request):

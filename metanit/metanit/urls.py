@@ -30,8 +30,11 @@ products_patterns = [
 
 urlpatterns = [
     path('', views.index),
+    path("postuser/", views.postuser),
+    path("data", views.data),
     path("meta", views.meta),
     path("complex", views.complex),
+    path("contacts", views.contact),
     path("get", views.get),
     path("set", views.set),
     path("json", views.json),

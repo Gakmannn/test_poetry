@@ -1,87 +1,32 @@
-<!DOCTYPE html>
-<html>
+{% extends "base.html" %}
+{% block title %}Главная{% endblock title %}
+{% block header %}Главная{% endblock header %}
 
-<head>
-  <title>Django на METANIT.COM</title>
-  <meta charset="utf-8" />
-</head>
-
-<body>
-  <h2>{{ header }}</h2>
-  <p>{{ message }}</p>
-  <p>{{person.name}}</p>
-  {{ body }}
-  
-  {% comment %}
-  <p>Вывод содержимого в шаблон Django</p>
-  {% endcomment %}
-
-  <p>{{ users|join:"/ "}}</p>
-  <p>{{ users|slice:"1:3" }}</p>
-  <p>{{ users|length }}</p>
-
-  <p>{% now "Y" %}</p>
-  <p>{% now "F j Y" %}</p>
-  <p>{% now "N, j, Y" %}</p>
-  <p>{% now "N j, Y, H:i:s e" %}</p>
-
-  {% with isEnabled=False %}
-    {{ isEnabled|default:"unabled" }}
-  {% endwith %}
-
-  {% with user=None %}
-    {{ user|default_if_none:"Undefined" }}
-  {% endwith %}
-  
-  {% with value=34.23234 %}
-    {{ value|floatformat }}
-    {{ value|floatformat:2 }}
-    {{ value|floatformat:0 }}
-  {% endwith %}
-  
-  {% with value=32000.45 %}
-    <p>{{ value|floatformat:"0g" }}</p>
-  {% endwith %}
-
-  {% with message="hello" %}
-    <h2>{{ message|add:" Django" }}</h2>
-    <p>{{ message|capfirst }}</p>
-  {% endwith %}
-
-  {% with message="Я был дома" %}
-    <p>{{ message|cut:"был" }}</p>
-  {% endwith %}
-
-  {% autoescape off %}
-  {{ body }}
-  {% endautoescape %}
-
-  {% with name="Tom" age=29 %}
-    <div>
-      <p>Name: {{ name }}</p>
-      <p>Age: {{ age }}</p>
-    </div>
-  {% endwith %}
-
-  <ul>
-    {% for lan in langs %}
-      <li>{{ lan }}</li>
-    {% empty %}
-      <li>Langs array is empty</li>
-    {% endfor %}
-  </ul>
-
-  {% for key, value in data.items %}
-    <p>{{ key }}: {{ value }}</p>
-  {% endfor %}
-
-  {% if n > 0 %}
-    <p>Число положительное</p>
-  {% elif n < 0 %} 
-    <p>Число отрицательное</p>
+{% block content %}
+  <!-- <form method="post" action="postuser/">
+    {% csrf_token %}
+    <p>Name:<br> <input name="name" /></p>
+    <p>Age:<br> <input name="age" type="number" /></p>
+    <p>
+      Languages:<br />
+      <select multiple name="languages">
+        <option>Python</option>
+        <option>JavaScript</option>
+        <option>C++</option>
+        <option>Java</option>
+      </select>
+    </p>
+    <input type="submit" value="Send" />
+  </form> -->
+  {% if form %}
+    <form method="POST">
+      {% csrf_token %}
+      <table>
+        {{ form }}
+      </table>
+      <input type="submit" value="Send">
+    </form>
   {% else %}
-    <p>Число равно нулю</p>
+    <h2>{{string}}</h2>
   {% endif %}
-</body>
-
-</html>
+{% endblock content %}
