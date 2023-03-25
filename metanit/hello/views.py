@@ -4,16 +4,63 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
 from random import randint  
 from .forms import UserForm
+from .models import Person
+import asyncio
+  
+# async def acreate_person():
+#     person = await Person.objects.acreate(name="Tim", age=26)
+#     print(person.name)
+ 
+# # запускаем асинхронную функцию acreate_person
+# asyncio.run(acreate_person())
+
+
+people = Person.objects.all()[2:4]
+print(people.query)
+
+tom = Person.objects.get(name="Tom")    # получаем запись, где name="Tom"
+bob = Person.objects.get(age=23)        # получаем запись, где age=42
+
+print(tom.sayHi())
+
+# bob, created = Person.objects.get_or_create(name="Bob", age=24)
+# print(created)
+# print(bob.name)
+# print(bob.age)
+
+# получаем объекты с именем Tom
+# people = people.filter(name = "Tom",age = 31)
+# print(people.query)
+ 
+# tom = Person.objects.create(name="Tom", age=23)
+
+# people2 = Person.objects.in_bulk([1,3])
+# for id in people2:
+#     print(people2[id].name)
+#     print(people2[id].age)
+
+# получаем объекты с возрастом, равным 31
+# people = people.filter(age = 31)
+# print(people.query)
+# получаем все объекты
+# people = Person.objects.exclude(age=24)
+# здесь происходит выполнения запроса в БД
+for person in people:
+    print(f"{person.id}.{person.name} - {person.age}")
 
 def index(request):
+    userform = UserForm()
     if request.method == "POST":
-        name = request.POST.get("name")
-        age = request.POST.get("age")
-        string = f"Привет, {name}, твой возраст: {age}"
-        return render(request, "index.html", {"string": string})
-    else:
-        userform = UserForm()
-        return render(request, "index.html", {"form": userform})
+        userform = UserForm(request.POST)
+        if userform.is_valid():
+            name = userform.cleaned_data["name"]
+            return HttpResponse(f"<h2>Hello, {name}</h2>")
+       
+        # name = request.POST.get("name")
+        # age = request.POST.get("age")
+        # string = f"Привет, {name}, твой возраст: {age}"
+        # return render(request, "index.html", {"string": string})
+    return render(request, "index.html", {"form": userform})
 
 def postuser(request):
     # получаем из данных запроса POST отправленные через форму данные
