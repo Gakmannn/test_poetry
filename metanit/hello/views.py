@@ -4,9 +4,39 @@ from django.core.serializers.json import DjangoJSONEncoder
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponsePermanentRedirect, HttpResponseNotFound, HttpResponseForbidden, HttpResponseBadRequest, JsonResponse
 from random import randint  
 from .forms import UserForm
-from .models import Person
+from .models import Person, Order
+from django.db.models import F, Avg, Min, Max, Sum
+from datetime import datetime
 import asyncio
   
+# добавление начальных данных
+# if Order.objects.count() == 0:
+#     Order.objects.create(datetime=datetime(2021, 12, 26, 11, 25, 34))
+#     Order.objects.create(datetime=datetime(2022, 5, 12, 12, 25, 34))
+#     Order.objects.create(datetime=datetime(2022, 5, 22, 13, 25, 34))
+#     Order.objects.create(datetime=datetime(2022, 8, 19, 14, 25, 34))
+
+# получаем заказы, сделанные в 5-м месяце
+# orders = Order.objects.filter(datetime__month=5)
+# for order in orders:
+#     print(order.datetime)
+
+# получаем заказы, сделанные после 5-го месяца
+# orders = Order.objects.all().order_by('-datetime__day')
+# for order in orders:
+#     print(order.datetime)
+
+# latest_person = Person.objects.latest("-name")
+# print(f"{latest_person.name} - {latest_person.age}")
+
+# средний возраст
+# avg_age = Person.objects.aggregate(Avg("age"))
+# print(avg_age)
+
+# сумма всех возрастов
+# sum = Person.objects.aggregate(Sum("age"))
+# print(sum)
+print(Person)
 # async def acreate_person():
 #     person = await Person.objects.acreate(name="Tim", age=26)
 #     print(person.name)
@@ -15,13 +45,14 @@ import asyncio
 # asyncio.run(acreate_person())
 
 
-people = Person.objects.all()[2:4]
-print(people.query)
+# people = Person.objects.all()[2:4]
+# people = Person.objects.all()
+# print(people.query)
 
-tom = Person.objects.get(name="Tom")    # получаем запись, где name="Tom"
-bob = Person.objects.get(age=23)        # получаем запись, где age=42
-
-print(tom.sayHi())
+# tom = Person.objects.get(name="Tom")    # получаем запись, где name="Tom"
+# bob = Person.objects.get(age=24)        # получаем запись, где age=42
+# Person.objects.filter(id=2).update(age=F("age") + 1)
+# print(tom.sayHi())
 
 # bob, created = Person.objects.get_or_create(name="Bob", age=24)
 # print(created)
@@ -40,13 +71,59 @@ print(tom.sayHi())
 #     print(people2[id].age)
 
 # получаем объекты с возрастом, равным 31
-# people = people.filter(age = 31)
+# people = people.filter(age__lt = 25)
 # print(people.query)
 # получаем все объекты
 # people = Person.objects.exclude(age=24)
 # здесь происходит выполнения запроса в БД
-for person in people:
-    print(f"{person.id}.{person.name} - {person.age}")
+# for person in people:
+    # print(f"{person.id}.{person.name} - {person.age}")
+
+
+# получение данных из бд
+def indexPerson(request):
+    people = Person.objects.all()
+    # print(Person)
+    return render(request, "persons.html", {"people": people})
+
+# сохранение данных в бд
+
+
+def createPerson(request):
+    if request.method == "POST":
+        person = Person()
+        person.name = request.POST.get("name")
+        person.age = request.POST.get("age")
+        person.save()
+    return HttpResponseRedirect("/persons")
+
+# изменение данных в бд
+
+
+def editPerson(request, id):
+    try:
+        person = Person.objects.get(id=id)
+
+        if request.method == "POST":
+            person.name = request.POST.get("name")
+            person.age = request.POST.get("age")
+            person.save()
+            return HttpResponseRedirect("/persons")
+        else:
+            return render(request, "edit.html", {"person": person})
+    except Person.DoesNotExist:
+        return HttpResponseNotFound("<h2>Person not found</h2>")
+
+# удаление данных из бд
+
+
+def deletePerson(request, id):
+    try:
+        person = Person.objects.get(id=id)
+        person.delete()
+        return HttpResponseRedirect("/persons")
+    except Person.DoesNotExist:
+        return HttpResponseNotFound("<h2>Person not found</h2>")
 
 def index(request):
     userform = UserForm()
@@ -219,10 +296,10 @@ def notaperson(request):
     bob = [1,2,4]
     return JsonResponse(bob, safe=False, encoder=PersonEncoder)
 
-class Person:
-    def __init__(self, name, age):
-        self.name = name    # имя человека
-        self.age = age      # возраст человека
+# class Person:
+#     def __init__(self, name, age):
+#         self.name = name    # имя человека
+#         self.age = age      # возраст человека
 
 class PersonEncoder(DjangoJSONEncoder):
     def default(self, obj):

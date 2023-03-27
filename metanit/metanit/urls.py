@@ -30,6 +30,10 @@ products_patterns = [
 
 urlpatterns = [
     path('', views.index),
+    path("persons/delete/<int:id>", views.deletePerson),
+    path("persons/edit/<int:id>/", views.editPerson),
+    path("persons/create", views.createPerson),
+    path("persons", views.indexPerson),
     path("postuser/", views.postuser),
     path("data", views.data),
     path("meta", views.meta),
@@ -38,8 +42,8 @@ urlpatterns = [
     path("get", views.get),
     path("set", views.set),
     path("json", views.json),
-    path("person", views.person),
     path("notaperson", views.notaperson),
+    path("person", views.person),
     path("people/<int:id>", views.people),
     path("access/<int:age>", views.access),
     path("products", include(product_patterns)),
